@@ -1,38 +1,56 @@
 package tiptaco.main;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
 import tiptaco.image.Dataset;
 import tiptaco.image.Display;
-import tiptaco.neuralnet.NN;
-import tiptaco.neuralnet.NeuralNetwork;
+import tiptaco.neuralnet.NetworkHelper;
+import tiptaco.neuralnet.NeuralController;
+import tiptaco.neuralnet.NeuralHelper;
+import tiptaco.neuralnet.TrainingSet;
 
 public class Main {
 
+	public static double ETA = 0.3;
+	
 	public static void main (String args[]) throws IOException
 	{
 		Dataset training = new Dataset("res/t10k-images.idx3-ubyte", "res/t10k-labels.idx1-ubyte");
 		Dataset testing = new Dataset("res/train-images.idx3-ubyte", "res/train-labels.idx1-ubyte");
+        
+		//displayImage(training, 0);
 		
-		displayImage(training, 0);
+		NeuralController nc = new NeuralController(ETA, 28*28, 70, 36, 10);
 		
-		NN nue = new NN(4,1,3,4);
+		TrainingSet train = new TrainingSet(28*28, 10);
+		train.addData(training);
 		
-		double[] input = new double[] {0.1, 0.2, 0.2, 0.9};
-		double[] output = new double[] {0.0, 1.0, 0.0, 0.0};
+		TrainingSet test = new TrainingSet(28*28, 10);
+		test.addData(testing);
 		
-		for (int ii = 0 ; ii < 1000000 ; ii++) {
+		nc.train(train, 250, 250);
+		
+		double MSE = nc.getNeuralNetwork().MSE(test, 1000);
+		
+		System.out.println("Trained with MSE " + MSE + " error" );
+		
+		int correct = 0;
+		int size = 1000;
+		
+		for (int ii = 0 ; ii < size; ii++) {
+		
+			int gave = testing.getLabels()[ii];
+			int got = NetworkHelper.getLargest(nc.getNeuralNetwork().calculate(NetworkHelper.generateInput(testing.getImages()[ii][0])));
 			
-			nue.train(input, output, 0.1);
+			System.out.println("gave " + gave + " got " + got);
 			
+			if (gave == got ) correct++; 
+		
 		}
 		
-		double[] out = nue.calculate(input);
-		
-		System.out.println(Arrays.toString(out));
-		
-		
+		System.out.println("Overall got " + correct + " / " + size);
 		/*
 		NeuralNetwork nn = new NeuralNetwork(28*28, 10, 400);
 		
@@ -62,6 +80,7 @@ public class Main {
 		}*/
 		
 	}
+
 	
 	/**
 	 * display an Image from the selected dataset with the label in console

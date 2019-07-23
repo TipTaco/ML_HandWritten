@@ -2,6 +2,7 @@ package tiptaco.image;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 public class Dataset {
 
@@ -39,7 +40,7 @@ public class Dataset {
 	 */
 	private void loadImages(String path) {
 		
-		byte[] input = loadData(path);
+		int[] input = loadData(path);
 		
 		if (input != null) {
 			
@@ -68,7 +69,7 @@ public class Dataset {
 	 */
 	private void loadLabels(String path) {
 		
-		byte[] input = loadData(path);
+		int[] input = loadData(path);
 				
 		if (input != null) {
 			
@@ -90,19 +91,45 @@ public class Dataset {
 	 * @param path
 	 * @return
 	 */
-	private byte[] loadData(String path) {
+	private int[] loadData(String path) {
 
 		File file = new File(path);
 
+		RandomAccessFile rf = null;
+		
+		ArrayList<int[]> ar = new ArrayList<int[]>();
+		
 		byte[] output = null;
+		int[] out = null;
 		try {
+			
+			//while (true) ar.add((int)rf.read());
+			
+			//file.rea
+			
+			//rf = new RandomAccessFile(path, "r");
+			//rf.readFully(output);
+			
+
 			output = Files.readAllBytes(file.toPath());
+			
+			out = new int[output.length];
+			
+			for (int ii = 0 ; ii < output.length ; ii++)
+			{
+				if (output[ii] < 0) {
+					out[ii] = 127 - output[ii]; 
+				} else {
+					out[ii] = output[ii];
+				}
+			}
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return output;		
+		return out;		
 	}
 	
 	public int[][][][] getImages()

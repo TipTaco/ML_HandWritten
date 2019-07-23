@@ -1,5 +1,7 @@
 package tiptaco.neuralnet;
 
+import java.util.ArrayList;
+
 public class NN {
 
 	public final int[] NETWORK_LAYER_SIZES;
@@ -31,19 +33,22 @@ public class NN {
 		for (int ii = 0 ; ii < NETWORK_SIZE ; ii++) {
 			
 			this.output[ii] = new double[NETWORK_LAYER_SIZES[ii]];
-			this.bias[ii] = NetworkHelper.randomArray(NETWORK_LAYER_SIZES[ii], 0.3, 0.7);
+			this.bias[ii] = NetworkHelper.randomArray(NETWORK_LAYER_SIZES[ii], -0.5, 0.7);
 			
 			this.errorSignal[ii] = new double[NETWORK_LAYER_SIZES[ii]];
 			this.outputDeriv[ii] = new double[NETWORK_LAYER_SIZES[ii]];
 			
 			if (ii > 0) {
-				
 				// Create weights for every layer after the input
-				this.weights[ii] =  NetworkHelper.randomArray(NETWORK_LAYER_SIZES[ii], NETWORK_LAYER_SIZES[ii-1], -0.3, 0.5);
+				this.weights[ii] =  NetworkHelper.randomArray(NETWORK_LAYER_SIZES[ii], NETWORK_LAYER_SIZES[ii-1], -1.0, 1.0);
 			}
 			
 		}
 		
+	}
+	
+	public double[] calculate(double[][] dataPoint) {
+		return calculate(dataPoint[0]);
 	}
 	
 	public double[] calculate(double... input) {
@@ -55,14 +60,13 @@ public class NN {
 		for (int layer = 1; layer < NETWORK_SIZE; layer++) {
 			for (int neuron = 0 ; neuron < NETWORK_LAYER_SIZES[layer] ; neuron++) {
 				
-				double x = 0.0;
+				double x = bias[layer][neuron];
 				
 				for (int k = 0 ; k < NETWORK_LAYER_SIZES[layer-1]; k++) {
 					x += output[layer-1][k] * weights[layer][neuron][k];
 					
 				}
 				
-				x += bias[layer][neuron];
 				output[layer][neuron] = sigmoid(x);
 				outputDeriv[layer][neuron] = output[layer][neuron] * (1.0 - output[layer][neuron]);
 			}
@@ -81,6 +85,34 @@ public class NN {
 		backpropError(target);
 		updateWeights(eta);
 		
+	}
+	
+	public double MSE(TrainingSet st, int batchSize) {
+		
+		double sum = 0.0;
+		ArrayList<double[][]> batch = st.getBatch(batchSize);
+		
+		for (int ii = 0; ii < batchSize; ii++) {
+			
+			sum += MSE(batch.get(ii)[0], batch.get(ii)[1]);
+			
+		}
+		
+		return sum / (double)batchSize;
+	}
+	
+	public double MSE(double[] input, double[] target)
+	{
+		double mse = 0.0;
+		
+		calculate(input);
+		
+		for (int ii = 0 ; ii < target.length; ii++) {
+			
+			mse += Math.pow(target[ii] - output[NETWORK_SIZE-1][ii], 2.0);
+		}
+		
+		return mse;
 	}
 	
 	public void backpropError(double[] target) {
