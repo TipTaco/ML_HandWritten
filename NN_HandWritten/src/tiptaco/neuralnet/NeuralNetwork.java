@@ -5,9 +5,9 @@ import java.util.Arrays;
 public class NeuralNetwork {
 	
 	public static final int OUTPUT_INTERVAL = 500;
-	public static final double EPSILON = 0.01;
+	public static final double EPSILON = 0.3;
 	
-	private int inputSize = 28*28, outputSize = 10, nodes = 50;
+	private int inputSize = 28*28, outputSize = 10, nodes = 72;
 
     double[][] W1, b1, W2, b2, W3, b3;
 	
@@ -19,14 +19,14 @@ public class NeuralNetwork {
 		outputSize = outputs;
 		nodes = hiddens;
 		
-	    W1 = NeuralHelper.subtract(1.0, NeuralHelper.random(nodes, inputSize));
-	    b1 = new double[nodes][1];
+	    W1 = NetworkHelper.randomArray(nodes, inputSize, -1.0, 1.0);
+	    b1 = NetworkHelper.randomArray(nodes, 1, -1.0, 1.0); //new double[nodes][1];
 
-	    W2 = NeuralHelper.subtract(1.0, NeuralHelper.random(nodes, nodes));
-	    b2 = new double[nodes][1];
+	    W2 = NetworkHelper.randomArray(nodes, nodes, -1.0, 1.0);
+	    b2 = NetworkHelper.randomArray(nodes, 1, -1.0, 1.0); //new double[nodes][1];
 	    
-	    W3 = NeuralHelper.subtract(1.0, NeuralHelper.random(outputSize, nodes));
-	    b3 = new double[outputSize][1];
+	    W3 = NetworkHelper.randomArray(outputSize, nodes, -1.0, 1.0);
+	    b3 = NetworkHelper.randomArray(outputSize, 1, -1.0, 1.0); //new double[outputSize][1];
 	    
 	    epoch = 0;
 	}
